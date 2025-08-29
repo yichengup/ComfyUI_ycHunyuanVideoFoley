@@ -25,7 +25,7 @@ This is a ComfyUI custom node wrapper for the HunyuanVideo-Foley model, which ge
 1. **Clone this repository** into your ComfyUI custom_nodes directory:
    ```bash
    cd ComfyUI/custom_nodes
-   git clone https://github.com/if-ai/ComfyUI_HunyuanVideoFoley.git ComfyUI_HunyuanVideoFoley](https://github.com/yichengup/ComfyUI_ycHunyuanVideoFoley.git
+   git clone https://github.com/yichengup/ComfyUI_ycHunyuanVideoFoley.git
    ```
 
 2. **Install dependencies**:
@@ -111,6 +111,7 @@ Based on the HunyuanVideo-Foley project by Tencent. Original paper and code avai
 - Paper: [HunyuanVideo-Foley: Text-Video-to-Audio Synthesis]
 
 - Code: [https://github.com/tencent/HunyuanVideo-Foley]
+
 
 
 
