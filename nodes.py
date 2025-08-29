@@ -31,6 +31,14 @@ except ImportError:
         logger.warning("VideoFromFile not available, will return file paths only")
         VideoFromFile = None
 
+# Import ComfyUI ProgressBar for real-time progress display
+try:
+    from comfy.utils import ProgressBar
+    HAS_PROGRESS_BAR = True
+except ImportError:
+    HAS_PROGRESS_BAR = False
+    logger.warning("ProgressBar not available, progress display will be disabled")
+
 # Add foley models directory to ComfyUI folder paths
 foley_models_dir = os.path.join(folder_paths.models_dir, "foley")
 if "foley" not in folder_paths.folder_names_and_paths:
@@ -75,7 +83,7 @@ except ImportError as e:
     logger.error("Make sure the HunyuanVideo-Foley package is installed and accessible")
     raise
 
-class HunyuanVideoFoleyNode:
+class YCHunyuanVideoFoley:
     """
     ComfyUI Node for HunyuanVideo-Foley: Generate audio from video and text prompts
     """
@@ -125,6 +133,13 @@ class HunyuanVideoFoleyNode:
                     "multiline": True,
                     "default": "",
                     "placeholder": "Additional negative prompts (optional). Will be combined with built-in quality controls."
+                }),
+                "fps": ("INT", {
+                    "default": 24,
+                    "min": 1,
+                    "max": 120,
+                    "step": 1,
+                    "description": "Frames per second for video processing and audio generation"
                 }),
                 "output_folder": ("STRING", {
                     "default": "hunyuan_foley",
@@ -243,7 +258,7 @@ class HunyuanVideoFoleyNode:
             return None
 
     @classmethod
-    def _write_temp_video(cls, frames: list) -> Tuple[bool, Optional[str], str]:
+    def _write_temp_video(cls, frames: list, fps: int = 24) -> Tuple[bool, Optional[str], str]:
         """Convert IMAGE sequence frames to temporary mp4 video file."""
         try:
             if not frames or len(frames) == 0:
@@ -264,8 +279,7 @@ class HunyuanVideoFoleyNode:
                 temp_dir = tempfile.mkdtemp()
                 temp_mp4 = os.path.join(temp_dir, "input_video.mp4")
                 
-                # Use reasonable FPS (24fps is standard)
-                fps = 24
+                # Use specified FPS or default to 24fps
                 writer = imageio.get_writer(temp_mp4, fps=fps, codec='libx264', quality=8)
                 
                 for arr in norm_frames:
@@ -275,8 +289,10 @@ class HunyuanVideoFoleyNode:
                 logger.info(f"Created temporary video with {len(norm_frames)} frames at {fps}fps")
                 return True, temp_mp4, ""
                 
+            except ImportError as e:
+                return False, None, f"imageio library not available. Please install with: pip install 'imageio[ffmpeg]'"
             except Exception as e:
-                return False, None, f"Failed to write temporary video (need imageio[ffmpeg]): {e}"
+                return False, None, f"Failed to write temporary video: {e}"
                 
         except Exception as e:
             return False, None, f"Frame processing error: {e}"
@@ -698,6 +714,7 @@ class HunyuanVideoFoleyNode:
     def generate_audio(self, video, text_prompt: str, guidance_scale: float, 
                       num_inference_steps: int, sample_nums: int, seed: int,
                       negative_prompt: str = "",
+                      fps: int = 24,
                       model_path: str = "", 
                       config_path: str = "",
                       auto_download: bool = True,
@@ -708,10 +725,28 @@ class HunyuanVideoFoleyNode:
         Generate audio for the input video frames with the given text prompt
         """
         try:
+            # Initialize progress bar for real-time progress display
+            if HAS_PROGRESS_BAR:
+                # Total steps: model loading(1) + frame extraction(1) + feature processing(1) + audio generation(1) + output saving(1)
+                total_steps = 5
+                progress_bar = ProgressBar(total_steps)
+                current_step = 0
+                
+                def update_progress(step_name: str, step_weight: int = 1):
+                    nonlocal current_step
+                    current_step += step_weight
+                    progress_bar.update_absolute(current_step, total_steps)
+                    logger.info(f"Progress: {step_name} ({current_step}/{total_steps})")
+            else:
+                # Fallback progress function when ProgressBar is not available
+                def update_progress(step_name: str, step_weight: int = 1):
+                    logger.info(f"Progress: {step_name}")
+            
             # Set seed for reproducibility
             self.set_seed(seed)
             
             # Load models if needed
+            update_progress("Loading models...", 1)
             success, message = self.load_models(model_path, config_path, auto_download, model_variant)
             if not success:
                 # Return empty values that won't cause downstream errors
@@ -747,6 +782,7 @@ class HunyuanVideoFoleyNode:
                 logger.debug(f"Video attributes: {video.__dict__}")
             
             # Extract frames from IMAGE input
+            update_progress("Extracting video frames...", 1)
             frames_extracted, frames, video_file, extract_msg = self._extract_frames_from_image_input(video)
             
             if not frames_extracted:
@@ -763,7 +799,7 @@ class HunyuanVideoFoleyNode:
             else:
                 # Convert frames to temporary video file
                 logger.info(f"Extracted {len(frames)} frames from IMAGE input")
-                ok, temp_video_file, msg = self._write_temp_video(frames)
+                ok, temp_video_file, msg = self._write_temp_video(frames, fps)
                 if not ok:
                     logger.error(f"Failed to create temporary video: {msg}")
                     empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
@@ -776,6 +812,7 @@ class HunyuanVideoFoleyNode:
                 return (empty_frames, empty_audio, f"❌ Video file not found: {temp_video_file}")
             
             # Feature processing
+            update_progress("Processing video features...", 1)
             logger.info("Processing video features...")
             visual_feats, text_feats, audio_len_in_s = self.custom_feature_process(
                 temp_video_file,
@@ -786,6 +823,7 @@ class HunyuanVideoFoleyNode:
             )
             
             # Generate audio
+            update_progress("Generating audio...", 1)
             logger.info("Generating audio...")
             audio, sample_rate = denoise_process(
                 visual_feats,
@@ -799,6 +837,7 @@ class HunyuanVideoFoleyNode:
             )
             
             # Create output directory structure
+            update_progress("Saving output files...", 1)
             output_dir = folder_paths.get_output_directory()
             
             # Create subfolder if specified
@@ -851,9 +890,9 @@ class HunyuanVideoFoleyNode:
 
 # Node mappings for ComfyUI
 NODE_CLASS_MAPPINGS = {
-    "HunyuanVideoFoley": HunyuanVideoFoleyNode,
+    "HunyuanVideoFoley": YCHunyuanVideoFoley,
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "HunyuanVideoFoley": "HunyuanVideo-Foley Generator (Frame-based)",
+    "HunyuanVideoFoley": "YC HunyuanVideo-Foley",
 }
