@@ -813,19 +813,19 @@ class YCHunyuanVideoFoley:
                     empty_frames = torch.zeros((1, 3, 256, 256))
                     return (empty_frames, empty_audio, "❌ Could not process images input format")
             else:
-                            # Convert frames to temporary video file
-            logger.info(f"Extracted {len(frames)} frames from IMAGE input")
-            ok, temp_video_file, msg = self._write_temp_video(frames, fps)
-            if not ok:
-                logger.error(f"Failed to create temporary video: {msg}")
-                empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
-                empty_frames = torch.zeros((1, 3, 256, 256))
-                return (empty_frames, empty_audio, f"❌ {msg}")
-            
-            if not os.path.exists(temp_video_file):
-                empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
-                empty_frames = torch.zeros((1, 3, 256, 256))
-                return (empty_frames, empty_audio, f"❌ Video file not found: {temp_video_file}")
+                # Convert frames to temporary video file
+                logger.info(f"Extracted {len(frames)} frames from IMAGE input")
+                ok, temp_video_file, msg = self._write_temp_video(frames, fps)
+                if not ok:
+                    logger.error(f"Failed to create temporary video: {msg}")
+                    empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
+                    empty_frames = torch.zeros((1, 3, 256, 256))
+                    return (empty_frames, empty_audio, f"❌ {msg}")
+                
+                if not os.path.exists(temp_video_file):
+                    empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
+                    empty_frames = torch.zeros((1, 3, 256, 256))
+                    return (empty_frames, empty_audio, f"❌ Video file not found: {temp_video_file}")
             
             # Feature processing
             update_progress("Processing video features...", 1)
