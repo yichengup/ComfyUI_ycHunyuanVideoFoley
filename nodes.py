@@ -651,6 +651,25 @@ class YCHunyuanVideoFoley:
             cls._model_path = None
             return False, error_msg
 
+    @classmethod
+    def unload_models(cls):
+        """Unload models to free memory - called automatically by ComfyUI"""
+        if cls._model_dict is not None:
+            logger.info("Unloading HunyuanVideo-Foley models to free memory")
+            cls._model_dict = None
+            cls._cfg = None
+            cls._device = None
+            cls._model_path = None
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+            logger.info("Models unloaded and memory freed")
+
+    def cleanup(self):
+        """Cleanup method called by ComfyUI when node is no longer needed"""
+        # This method is called automatically by ComfyUI's resource management
+        # We don't need to do anything here as models are managed at class level
+        pass
+
     def set_seed(self, seed: int):
         """Set random seed for reproducibility"""
         random.seed(seed)
