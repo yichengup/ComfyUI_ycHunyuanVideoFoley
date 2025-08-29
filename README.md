@@ -76,6 +76,23 @@ Main node for generating audio from video and text.
 - **audio_only**: Generated audio file (AUDIO) 
 - **status_message**: Generation status and info (STRING)
 
+## ⚠ Important Limitations
+
+### **Frame Count & Duration Limits**
+- **Maximum Frames**: 450 frames (hard limit)
+- **Maximum Duration**: 15 seconds at 30fps
+- **Recommended**: Keep videos ≤15 seconds for best results
+
+### **FPS Recommendations**
+- **30fps**: Max 15 seconds (450 frames)
+- **24fps**: Max 18.75 seconds (450 frames)  
+- **15fps**: Max 30 seconds (450 frames)
+
+### **Long Video Solutions**
+For videos longer than 15 seconds:
+1. **Reduce FPS**: Lower FPS allows longer duration within frame limit
+2. **Segment Processing**: Split long videos into 15s segments
+3. **Audio Merging**: Combine generated audio segments in post-processing
 
 
 ## Example Workflow
@@ -111,6 +128,7 @@ Based on the HunyuanVideo-Foley project by Tencent. Original paper and code avai
 - Paper: [HunyuanVideo-Foley: Text-Video-to-Audio Synthesis]
 
 - Code: [https://github.com/tencent/HunyuanVideo-Foley]
+
 
 
 
