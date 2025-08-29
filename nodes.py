@@ -165,7 +165,7 @@ class YCHunyuanVideoFoley:
     RETURN_TYPES = ("IMAGE", "AUDIO", "STRING")  # Changed from STRING to IMAGE for frame output
     RETURN_NAMES = ("video_frames", "audio", "status_message")  # Updated return names
     FUNCTION = "generate_audio"
-    CATEGORY = "ImpactFrames💥🎞️/audio"
+    CATEGORY = "HunyuanVideo-Foley"
     DESCRIPTION = "Generate realistic audio from video frames and text descriptions using HunyuanVideo-Foley. Supports IMAGE sequence input, custom negative prompts, and outputs frames with audio."
 
     @classmethod
@@ -896,3 +896,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "HunyuanVideoFoley": "YC HunyuanVideo-Foley",
 }
+
