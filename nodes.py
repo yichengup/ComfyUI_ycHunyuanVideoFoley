@@ -98,7 +98,7 @@ class YCHunyuanVideoFoley:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "video": ("IMAGE",),  # Changed from VIDEO to IMAGE to support frame sequences
+                "images": ("IMAGE",),  # Changed from VIDEO to IMAGE to support frame sequences
                 "text_prompt": ("STRING", {
                     "multiline": True, 
                     "default": "A person walks on frozen ice",
@@ -912,3 +912,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "HunyuanVideoFoley": "YC HunyuanVideo-Foley",
 }
+
