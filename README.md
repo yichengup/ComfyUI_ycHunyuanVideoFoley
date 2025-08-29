@@ -3,7 +3,7 @@
 This is a ComfyUI custom node wrapper for the HunyuanVideo-Foley model, which generates realistic audio from video and text descriptions.
 
 <img width="1723" height="762" alt="image" src="https://github.com/user-attachments/assets/0e5f4996-cd92-4d3f-8d54-46b2319b725a" />
-### Modified the nodes based on the big guy's foundation, modified the frame image input and output, and added a negative prompt box
+## Modified the nodes based on the big guy's foundation, modified the frame image input and output, and added a negative prompt box
 <img width="1006" height="660" alt="image" src="https://github.com/user-attachments/assets/bb7e392b-7832-42c8-ba32-a3183769e276" />
 
 
@@ -109,5 +109,6 @@ Based on the HunyuanVideo-Foley project by Tencent. Original paper and code avai
 - Paper: [HunyuanVideo-Foley: Text-Video-to-Audio Synthesis]
 
 - Code: [https://github.com/tencent/HunyuanVideo-Foley]
+
 
 
