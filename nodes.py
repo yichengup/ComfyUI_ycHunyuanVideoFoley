@@ -134,13 +134,10 @@ class YCHunyuanVideoFoley:
                     "default": "",
                     "placeholder": "Additional negative prompts (optional). Will be combined with built-in quality controls."
                 }),
-                "fps": ("INT", {
-                    "default": 24,
-                    "min": 1,
-                    "max": 120,
-                    "step": 1,
-                    "description": "Frames per second for video processing and audio generation"
-                }),
+                "fps": (
+                    "FLOAT",  # 改为FLOAT类型以支持小数帧率，与VideoHelperSuite兼容
+                    {"default": 24.0, "min": 1.0, "max": 120.0, "step": 0.1}
+                ),
                 "output_folder": ("STRING", {
                     "default": "hunyuan_foley",
                     "multiline": False,
@@ -258,7 +255,7 @@ class YCHunyuanVideoFoley:
             return None
 
     @classmethod
-    def _write_temp_video(cls, frames: list, fps: int = 24) -> Tuple[bool, Optional[str], str]:
+    def _write_temp_video(cls, frames: list, fps: float = 24.0) -> Tuple[bool, Optional[str], str]:
         """Convert IMAGE sequence frames to temporary mp4 video file."""
         try:
             if not frames or len(frames) == 0:
@@ -711,16 +708,16 @@ class YCHunyuanVideoFoley:
             return original_feature_process(video_path, prompt, model_dict, cfg)
 
     @torch.inference_mode()
-    def generate_audio(self, video, text_prompt: str, guidance_scale: float, 
-                      num_inference_steps: int, sample_nums: int, seed: int,
-                      negative_prompt: str = "",
-                      fps: int = 24,
-                      model_path: str = "", 
-                      config_path: str = "",
-                      auto_download: bool = True,
-                      model_variant: str = "hunyuanvideo-foley-xxl",
-                      output_folder: str = "hunyuan_foley",
-                      filename_prefix: str = "foley_"):
+    def generate_audio(self, video: Any, text_prompt: str, guidance_scale: float, 
+                        num_inference_steps: int, sample_nums: int, seed: int,
+                        negative_prompt: str = "",
+                        fps: float = 24.0,
+                        model_path: str = "", 
+                        config_path: str = "",
+                        auto_download: bool = True,
+                        model_variant: str = "hunyuanvideo-foley-xxl",
+                        output_folder: str = "hunyuan_foley",
+                        filename_prefix: str = "foley_"):
         """
         Generate audio for the input video frames with the given text prompt
         """
@@ -896,4 +893,3 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "HunyuanVideoFoley": "YC HunyuanVideo-Foley",
 }
-
