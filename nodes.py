@@ -85,7 +85,7 @@ except ImportError as e:
 
 class YCHunyuanVideoFoley:
     """
-    ComfyUI Node for HunyuanVideo-Foley: Generate audio from video and text prompts
+    ComfyUI Node for HunyuanVideo-Foley: Generate audio from image frames and text prompts
     """
     
     # Class variables for model caching
@@ -163,7 +163,7 @@ class YCHunyuanVideoFoley:
     RETURN_NAMES = ("video_frames", "audio", "status_message")  # Updated return names
     FUNCTION = "generate_audio"
     CATEGORY = "HunyuanVideo-Foley"
-    DESCRIPTION = "Generate realistic audio from video frames and text descriptions using HunyuanVideo-Foley. Supports IMAGE sequence input, custom negative prompts, and outputs frames with audio."
+    DESCRIPTION = "Generate realistic audio from image frames and text descriptions using HunyuanVideo-Foley. Supports IMAGE sequence input, custom negative prompts, and outputs frames with audio."
 
     @classmethod
     def _required_model_filenames(cls, model_variant: str) -> Tuple[str, ...]:
@@ -183,44 +183,44 @@ class YCHunyuanVideoFoley:
             return False
 
     @classmethod
-    def _extract_frames_from_image_input(cls, video: Any) -> Tuple[bool, Optional[list], Optional[str], str]:
+    def _extract_frames_from_image_input(cls, images: Any) -> Tuple[bool, Optional[list], Optional[str], str]:
         """Extract frames from ComfyUI IMAGE input (can be single image or sequence)."""
         try:
             frames = []
             
             # Handle torch tensor input (most common case)
-            if isinstance(video, torch.Tensor):
-                if video.ndim == 3:
+            if isinstance(images, torch.Tensor):
+                if images.ndim == 3:
                     # Single image (C, H, W) -> convert to sequence of 1
-                    frames = [video]
-                elif video.ndim == 4:
+                    frames = [images]
+                elif images.ndim == 4:
                     # Image sequence (B, C, H, W) -> extract each frame
-                    frames = [video[i] for i in range(video.shape[0])]
+                    frames = [images[i] for i in range(images.shape[0])]
                 else:
-                    return False, None, None, f"Unsupported tensor shape: {video.shape}"
+                    return False, None, None, f"Unsupported tensor shape: {images.shape}"
                 
                 return True, frames, None, ""
             
             # Handle list/tuple of tensors
-            elif isinstance(video, (list, tuple)) and len(video) > 0:
-                if all(isinstance(f, torch.Tensor) for f in video):
-                    frames = list(video)
+            elif isinstance(images, (list, tuple)) and len(images) > 0:
+                if all(isinstance(f, torch.Tensor) for f in images):
+                    frames = list(images)
                     return True, frames, None, ""
                 else:
                     return False, None, None, "Mixed types in frame sequence"
             
             # Handle dict with frames key
-            elif isinstance(video, dict):
+            elif isinstance(images, dict):
                 for key in ("frames", "images", "video"):
-                    val = video.get(key)
+                    val = images.get(key)
                     if val is not None:
                         return cls._extract_frames_from_image_input(val)
             
             # Handle string path (fallback for compatibility)
-            elif isinstance(video, str) and cls._string_looks_like_video_path(video):
-                return False, None, video, "Video file path detected"
+            elif isinstance(images, str) and cls._string_looks_like_video_path(images):
+                return False, None, images, "Video file path detected"
             
-            return False, None, None, f"Unsupported IMAGE input type: {type(video)}"
+            return False, None, None, f"Unsupported IMAGE input type: {type(images)}"
             
         except Exception as e:
             return False, None, None, f"Error extracting frames: {str(e)}"
@@ -727,7 +727,7 @@ class YCHunyuanVideoFoley:
             return original_feature_process(video_path, prompt, model_dict, cfg)
 
     @torch.inference_mode()
-    def generate_audio(self, video: Any, text_prompt: str, guidance_scale: float, 
+    def generate_audio(self, images: Any, text_prompt: str, guidance_scale: float, 
                         num_inference_steps: int, sample_nums: int, seed: int,
                         negative_prompt: str = "",
                         fps: float = 24.0,
@@ -738,7 +738,7 @@ class YCHunyuanVideoFoley:
                         output_folder: str = "hunyuan_foley",
                         filename_prefix: str = "foley_"):
         """
-        Generate audio for the input video frames with the given text prompt
+        Generate audio for the input image frames with the given text prompt
         """
         try:
             # Initialize progress bar for real-time progress display
@@ -772,10 +772,10 @@ class YCHunyuanVideoFoley:
                 return (empty_frames, empty_audio, f"❌ {message}")
             
             # Validate inputs
-            if video is None:
+            if images is None:
                 empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
                 empty_frames = torch.zeros((1, 3, 256, 256))  # Empty frame sequence
-                return (empty_frames, empty_audio, "❌ Please provide video frames input!")
+                return (empty_frames, empty_audio, "❌ Please provide image frames input!")
             
             # Clean text prompt
             if text_prompt is None:
@@ -787,19 +787,19 @@ class YCHunyuanVideoFoley:
                 negative_prompt = ""
             negative_prompt = negative_prompt.strip()
             
-            logger.info(f"Processing video frames with prompt: {text_prompt}")
+            logger.info(f"Processing image frames with prompt: {text_prompt}")
             if negative_prompt:
                 logger.info(f"Using negative prompt: {negative_prompt}")
             logger.info(f"Generating {sample_nums} sample(s)")
             
-            # Debug log the video input type
-            logger.info(f"Video input type: {type(video)}")
-            if hasattr(video, '__dict__'):
-                logger.debug(f"Video attributes: {video.__dict__}")
+            # Debug log the images input type
+            logger.info(f"Images input type: {type(images)}")
+            if hasattr(images, '__dict__'):
+                logger.debug(f"Images attributes: {images.__dict__}")
             
             # Extract frames from IMAGE input
-            update_progress("Extracting video frames...", 1)
-            frames_extracted, frames, video_file, extract_msg = self._extract_frames_from_image_input(video)
+            update_progress("Extracting image frames...", 1)
+            frames_extracted, frames, video_file, extract_msg = self._extract_frames_from_image_input(images)
             
             if not frames_extracted:
                 # Try to handle as video file path (fallback compatibility)
@@ -807,20 +807,20 @@ class YCHunyuanVideoFoley:
                     logger.info(f"Using video file: {video_file}")
                     temp_video_file = video_file
                 else:
-                    logger.error(f"Could not extract frames from input type: {type(video)}")
-                    logger.debug(f"Video input content: {video}")
+                    logger.error(f"Could not extract frames from input type: {type(images)}")
+                    logger.debug(f"Images input content: {images}")
                     empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
                     empty_frames = torch.zeros((1, 3, 256, 256))
-                    return (empty_frames, empty_audio, "❌ Could not process video input format")
+                    return (empty_frames, empty_audio, "❌ Could not process images input format")
             else:
-                # Convert frames to temporary video file
-                logger.info(f"Extracted {len(frames)} frames from IMAGE input")
-                ok, temp_video_file, msg = self._write_temp_video(frames, fps)
-                if not ok:
-                    logger.error(f"Failed to create temporary video: {msg}")
-                    empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
-                    empty_frames = torch.zeros((1, 3, 256, 256))
-                    return (empty_frames, empty_audio, f"❌ {msg}")
+                            # Convert frames to temporary video file
+            logger.info(f"Extracted {len(frames)} frames from IMAGE input")
+            ok, temp_video_file, msg = self._write_temp_video(frames, fps)
+            if not ok:
+                logger.error(f"Failed to create temporary video: {msg}")
+                empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
+                empty_frames = torch.zeros((1, 3, 256, 256))
+                return (empty_frames, empty_audio, f"❌ {msg}")
             
             if not os.path.exists(temp_video_file):
                 empty_audio = {"waveform": torch.zeros((1, 48000)), "sample_rate": 48000}
@@ -912,4 +912,3 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "HunyuanVideoFoley": "YC HunyuanVideo-Foley",
 }
-
