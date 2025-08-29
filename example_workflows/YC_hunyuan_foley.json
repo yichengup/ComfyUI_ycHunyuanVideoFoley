@@ -1,19 +1,100 @@
 {
   "id": "b97ba031-d866-4f4e-baf5-3017bd4ef4b5",
   "revision": 0,
-  "last_node_id": 21,
-  "last_link_id": 36,
+  "last_node_id": 28,
+  "last_link_id": 59,
   "nodes": [
+    {
+      "id": 26,
+      "type": "VHS_VideoInfo",
+      "pos": [
+        274.2845764160156,
+        519.7046508789062
+      ],
+      "size": [
+        218.12109375,
+        206
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "video_info",
+          "type": "VHS_VIDEOINFO",
+          "link": 51
+        }
+      ],
+      "outputs": [
+        {
+          "name": "source_fps🟨",
+          "type": "FLOAT",
+          "links": [
+            58,
+            59
+          ]
+        },
+        {
+          "name": "source_frame_count🟨",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "source_duration🟨",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "source_width🟨",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "source_height🟨",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "loaded_fps🟦",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "loaded_frame_count🟦",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "loaded_duration🟦",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "loaded_width🟦",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "loaded_height🟦",
+          "type": "INT",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoInfo"
+      },
+      "widgets_values": {}
+    },
     {
       "id": 16,
       "type": "VHS_LoadVideo",
       "pos": [
-        -45.71297836303711,
-        136.886962890625
+        -209.3773651123047,
+        50.5965576171875
       ],
       "size": [
-        247.455078125,
-        728.8099365234375
+        252.2359619140625,
+        556.2359619140625
       ],
       "flags": {},
       "order": 0,
@@ -37,13 +118,13 @@
           "name": "IMAGE",
           "type": "IMAGE",
           "links": [
-            36
+            55
           ]
         },
         {
           "name": "frame_count",
           "type": "INT",
-          "links": null
+          "links": []
         },
         {
           "name": "audio",
@@ -53,14 +134,16 @@
         {
           "name": "video_info",
           "type": "VHS_VIDEOINFO",
-          "links": null
+          "links": [
+            51
+          ]
         }
       ],
       "properties": {
         "Node name for S&R": "VHS_LoadVideo"
       },
       "widgets_values": {
-        "video": "8f47.mp4",
+        "video": "Wan22_video_00003_ddnhb_1756405552.mp4",
         "force_rate": 0,
         "custom_width": 0,
         "custom_height": 0,
@@ -79,7 +162,7 @@
             "frame_load_cap": 0,
             "skip_first_frames": 0,
             "select_every_nth": 1,
-            "filename": "8f47.mp4",
+            "filename": "Wan22_video_00003_ddnhb_1756405552.mp4",
             "type": "input",
             "format": "video/mp4"
           }
@@ -87,30 +170,97 @@
       }
     },
     {
-      "id": 19,
-      "type": "VHS_VideoCombine",
+      "id": 28,
+      "type": "HunyuanVideoFoley",
       "pos": [
-        769.106689453125,
-        146.09738159179688
+        196.5385284423828,
+        54.99362564086914
       ],
       "size": [
-        214.7587890625,
-        694.2378540039062
+        400,
+        374
       ],
       "flags": {},
       "order": 2,
       "mode": 0,
       "inputs": [
         {
+          "name": "video",
+          "type": "IMAGE",
+          "link": 55
+        },
+        {
+          "name": "fps",
+          "shape": 7,
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": 58
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video_frames",
+          "type": "IMAGE",
+          "links": [
+            56
+          ]
+        },
+        {
+          "name": "audio",
+          "type": "AUDIO",
+          "links": [
+            57
+          ]
+        },
+        {
+          "name": "status_message",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "HunyuanVideoFoley"
+      },
+      "widgets_values": [
+        "girl water ",
+        4.5,
+        50,
+        1,
+        1787406619,
+        "randomize",
+        "Sharp sound,Sharp flute sound,noise sound",
+        23.900000000000002,
+        "hunyuan_foley",
+        "foley_"
+      ]
+    },
+    {
+      "id": 19,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        817.6680908203125,
+        60.09852600097656
+      ],
+      "size": [
+        214.7587890625,
+        542.7587890625
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
           "name": "images",
           "type": "IMAGE",
-          "link": 35
+          "link": 56
         },
         {
           "name": "audio",
           "shape": 7,
           "type": "AUDIO",
-          "link": 34
+          "link": 57
         },
         {
           "name": "meta_batch",
@@ -123,6 +273,14 @@
           "shape": 7,
           "type": "VAE",
           "link": null
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": 59
         }
       ],
       "outputs": [
@@ -150,109 +308,76 @@
           "hidden": false,
           "paused": false,
           "params": {
-            "filename": "AnimateDiff_00062-audio.mp4",
+            "filename": "AnimateDiff_00100-audio.mp4",
             "subfolder": "",
             "type": "output",
             "format": "video/h264-mp4",
-            "frame_rate": 24,
-            "workflow": "AnimateDiff_00062.png",
-            "fullpath": "/root/ComfyUI/output/AnimateDiff_00062-audio.mp4"
+            "frame_rate": 16,
+            "workflow": "AnimateDiff_00100.png",
+            "fullpath": "/root/ComfyUI/output/AnimateDiff_00100-audio.mp4"
           }
         }
       }
-    },
-    {
-      "id": 21,
-      "type": "HunyuanVideoFoley",
-      "pos": [
-        267.00091552734375,
-        142.48121643066406
-      ],
-      "size": [
-        400,
-        350
-      ],
-      "flags": {},
-      "order": 1,
-      "mode": 0,
-      "inputs": [
-        {
-          "name": "video",
-          "type": "IMAGE",
-          "link": 36
-        }
-      ],
-      "outputs": [
-        {
-          "name": "video_frames",
-          "type": "IMAGE",
-          "links": [
-            35
-          ]
-        },
-        {
-          "name": "audio",
-          "type": "AUDIO",
-          "links": [
-            34
-          ]
-        },
-        {
-          "name": "status_message",
-          "type": "STRING",
-          "links": null
-        }
-      ],
-      "properties": {
-        "Node name for S&R": "HunyuanVideoFoley"
-      },
-      "widgets_values": [
-        "The camera is fixed, two little sparrows are chirping, it is raining heavily, and the sound of rain changes smoothly, naturally, and smoothly, strictly according to the prompt words.",
-        4.5,
-        50,
-        1,
-        1267013141,
-        "randomize",
-        "Sharp sound，song,Soundtrack，Sharp flute sound",
-        "hunyuan_foley",
-        "foley_"
-      ]
     }
   ],
   "links": [
     [
-      34,
-      21,
+      51,
+      16,
+      3,
+      26,
+      0,
+      "VHS_VIDEOINFO"
+    ],
+    [
+      55,
+      16,
+      0,
+      28,
+      0,
+      "IMAGE"
+    ],
+    [
+      56,
+      28,
+      0,
+      19,
+      0,
+      "IMAGE"
+    ],
+    [
+      57,
+      28,
       1,
       19,
       1,
       "AUDIO"
     ],
     [
-      35,
-      21,
+      58,
+      26,
       0,
-      19,
-      0,
-      "IMAGE"
+      28,
+      1,
+      "FLOAT"
     ],
     [
-      36,
-      16,
+      59,
+      26,
       0,
-      21,
-      0,
-      "IMAGE"
+      19,
+      4,
+      "FLOAT"
     ]
   ],
   "groups": [],
   "config": {},
   "extra": {
     "ds": {
-      "scale": 1.150413223140535,
+      "scale": 1.0458302028550375,
       "offset": [
-        391.2798954358558,
-        -5.812287275188282
+        403.77950360591103,
+        47.37887272650042
       ]
     },
     "frontendVersion": "1.23.4",
