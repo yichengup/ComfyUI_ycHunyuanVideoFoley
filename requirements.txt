@@ -11,7 +11,7 @@ timm
 accelerate
 
 # Transformers and NLP
-git+https://github.com/huggingface/transformers@v4.49.0-SigLIP-2
+transformers>=4.37.0
 sentencepiece
 huggingface_hub
 
