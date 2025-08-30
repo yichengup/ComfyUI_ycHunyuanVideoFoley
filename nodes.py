@@ -148,6 +148,11 @@ class YCHunyuanVideoFoley:
                     "multiline": False,
                     "placeholder": "Prefix for output filename"
                 }),
+                "force_unload": ("BOOLEAN", {
+                    "default": False,
+                    "label": "Force Unload Models",
+                    "description": "Force unload models after generation to free memory"
+                }),
             },
             # Keep operational parameters out of the UI
             "hidden": {
@@ -736,7 +741,8 @@ class YCHunyuanVideoFoley:
                         auto_download: bool = True,
                         model_variant: str = "hunyuanvideo-foley-xxl",
                         output_folder: str = "hunyuan_foley",
-                        filename_prefix: str = "foley_"):
+                        filename_prefix: str = "foley_",
+                        force_unload: bool = False): # Added force_unload parameter
         """
         Generate audio for the input image frames with the given text prompt
         """
@@ -893,7 +899,14 @@ class YCHunyuanVideoFoley:
             logger.info(success_msg)
             
             # Return frames as IMAGE type for ComfyUI compatibility
-            return (output_frames, audio_result, success_msg)
+            result = (output_frames, audio_result, success_msg)
+            
+            # Force unload models if requested
+            if force_unload:
+                logger.info("Force unloading models as requested...")
+                self.unload_models()
+            
+            return result
             
         except Exception as e:
             error_msg = f"❌ Generation failed: {str(e)}"
@@ -912,3 +925,4 @@ NODE_CLASS_MAPPINGS = {
 NODE_DISPLAY_NAME_MAPPINGS = {
     "HunyuanVideoFoley": "YC HunyuanVideo-Foley",
 }
+
