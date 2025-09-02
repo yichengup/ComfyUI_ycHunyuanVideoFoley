@@ -6,6 +6,9 @@ This is a ComfyUI custom node wrapper for the HunyuanVideo-Foley model, which ge
 ## ✨大佬的原插件已更新，安装原插件就行 (https://github.com/if-ai/ComfyUI_HunyuanVideoFoley)
 ## The original plug-in of the boss has been updated, just install the original plug-in
 <img width="1006" height="660" alt="image" src="https://github.com/user-attachments/assets/bb7e392b-7832-42c8-ba32-a3183769e276" />
+## 模型卸载 Model Unloading
+<img width="804" height="542" alt="bd36754d74ffe001890d76cfd0b4211" src="https://github.com/user-attachments/assets/043c74ed-1e8e-42a3-8702-5abb7c73bd23" />
+
 
 
 
@@ -127,6 +130,7 @@ Based on the HunyuanVideo-Foley project by Tencent. Original paper and code avai
 - Paper: [HunyuanVideo-Foley: Text-Video-to-Audio Synthesis]
 
 - Code: [https://github.com/tencent/HunyuanVideo-Foley]
+
 
 
 
